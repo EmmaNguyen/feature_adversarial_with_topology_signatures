@@ -34,23 +34,13 @@ def parse_arguments():
     return parser.parse_args()
 
 def run_topological_signature(opt):
-        # import pdb; pdb.set_trace()
         data_loader = get_MNIST(opt)
-
-        # generator = Generator(opt.latent_dim, opt.img_size, opt.channels)
-        # generator.apply(weights_init_normal)
-        # generator_solver = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
-
-        # decoder = Decoder(opt.img_size, opt.latent_dim)
-        # decoder.apply(weights_init_normal)
-        # decoder_solver = torch.optim.Adam(decoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
         discriminator = Discriminator(opt.img_size, opt.latent_dim)
         discriminator.apply(weights_init_normal)
         discriminator_solver = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
         if cuda:
-            # generator.cuda()
             discriminator.cuda()
             adversarial_loss.cuda()
 
@@ -61,22 +51,13 @@ def run_topological_signature(opt):
 
                 if cuda: imgs = imgs.type(torch.cuda.FloatTensor)
 
-                # Generate a batch of images
-                # fake_imgs = generator(z)
-                # fake_z = decoder(real_imgs)
-
-                # generator_loss = get_loss_generator(discriminator, fake_imgs, z, real_imgs, fake_z)
-                # generator_loss.backward()
-                # generator_solver.step()
-
                 discriminator_solver.zero_grad()
-                discriminator_loss = get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z)
-                # import pdb; pdb.set_trace()
+                discriminator_loss = adversarial_loss(discriminator(imgs), imgs)
                 discriminator_loss.backward()
                 discriminator_solver.step()
 
                 print ("[Epoch %d/%d] [Batch %d/%d] [D loss: %f]" % (epoch, opt.n_epochs, i, len(data_loader),
-                                                                discriminator_loss.data.item())
+                                                                discriminator_loss.data.item()))
 
                 batches_done = epoch * len(data_loader) + i
 
@@ -85,6 +66,4 @@ def run_topological_signature(opt):
 
 if __name__=="__main__":
     opt = parse_arguments()
-    # import pdb; pdb.set_trace()
     run_topological_signature(opt)
-    # run_feature_adversarial_network(opt)
