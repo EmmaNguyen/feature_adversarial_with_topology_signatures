@@ -11,7 +11,7 @@ cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
 class Generator(nn.Module):
-    def __init__(self, latent_dim, img_size, channels):
+    def __init__(self, latent_dim=10, img_size=, channels):
         super(Generator, self).__init__()
         self.latent_dim = latent_dim
         self.img_size = img_size
