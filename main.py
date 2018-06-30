@@ -12,9 +12,9 @@ from torchvision.utils import save_image
 
 from utils.utils import print_progress, get_sample_data, view_generated_data, get_MNIST, weights_init_normal
 # from generative_model.emma_ali import run_generative_adversarial_network
-from architecture.neural_nets import Generator, Discriminator, Decoder
-from architecture.neural_nets import train_discriminator, get_loss_generator, get_loss_discriminator
-from architecture.neural_nets import get_loss_wasserstein_discriminator, get_loss_wasserstein_generator
+from architecture.neural_topo_nets import Generator, Discriminator, Decoder
+from architecture.neural_topo_nets import train_discriminator, get_loss_generator, get_loss_discriminator
+from architecture.neural_topo_nets import get_loss_wasserstein_discriminator, get_loss_wasserstein_generator
 
 os.makedirs('images', exist_ok=True)
 
