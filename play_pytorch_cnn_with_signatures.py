@@ -33,8 +33,8 @@ train_dataset = torchvision.datasets.MNIST(root='../../data/mnist/',
 test_dataset = torchvision.datasets.MNIST(root='../../data/mnist/',
                                           train=False,
                                           transform=transforms.ToTensor())
-
-generate_dgm_provider(raw_data_path, provider_path, 32)
+import pdb; pdb.set_trace()
+dgm = generate_dgm_provider(raw_data_path, provider_path, 32)
 
 # Data loader
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
