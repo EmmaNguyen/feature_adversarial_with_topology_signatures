@@ -1,3 +1,5 @@
+# This file include a list of customized adversarial learned inference
+
 def run_generative_adversarial_network(opt):
     data_loader = get_MNIST(opt)
 

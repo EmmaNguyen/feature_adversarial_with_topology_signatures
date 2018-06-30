@@ -1,11 +1,11 @@
-import torchvision.transforms as transforms
-from torchvision.utils import save_image
-from torch.utils.data import DataLoader
-from torchvision import datasets
-from torch.autograd import Variable
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
+import torchvision.transforms as transforms
+from torchvision import datasets
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+from torchvision.utils import save_image
 
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
