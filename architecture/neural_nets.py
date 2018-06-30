@@ -41,6 +41,37 @@ class Generator(nn.Module):
 
         return img
 
+class Generator(nn.Module):
+    def __init__(self, latent_dim, img_size, channels):
+        super(Generator, self).__init__()
+        self.latent_dim = latent_dim
+        self.img_size = img_size
+        self.channels = channels
+
+        self.model = nn.Sequential(
+            nn.Linear(self.latent_dim, 128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(128, 256),
+            nn.BatchNorm1d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(256, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(512, 1024),
+            nn.BatchNorm1d(1024),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(1024, self.img_size**2),
+            nn.Tanh()
+        )
+
+    def forward(self, noise):
+        # import pdb;
+        img = self.model(noise)
+        # pdb.set_trace(im)
+        img = img.view(img.size()[0], self.channels, self.img_size, self.img_size)
+
+        return img
+
 class Discriminator(nn.Module):
     def __init__(self, img_size, latent_dim):
         super(Discriminator, self).__init__()

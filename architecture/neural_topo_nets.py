@@ -1,17 +1,45 @@
-import torchvision.transforms as transforms
-from torchvision.utils import save_image
-from torch.utils.data import DataLoader
-from torchvision import datasets
-from torch.autograd import Variable
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
-
+import torchvision.transforms as transforms
+from torchvision import datasets
+from torchvision.utils import save_image
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
 
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-class Topo_Generator(nn.Module):
+class Generator(nn.Module):
+    def __init__(self, latent_dim, img_size, channels):
+        super(Generator, self).__init__()
+        self.latent_dim = latent_dim
+        self.img_size = img_size
+        self.channels = channels
+
+        self.model = nn.Sequential(
+            nn.Linear(self.latent_dim, 128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(128, 256),
+            nn.BatchNorm1d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(256, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(512, 1024),
+            nn.BatchNorm1d(1024),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(1024, self.img_size**2),
+            nn.Tanh()
+        )
+
+    def forward(self, noise):
+        # import pdb;
+        img = self.model(noise)
+        # pdb.set_trace(im)
+        img = img.view(img.size()[0], self.channels, self.img_size, self.img_size)
+
+class Discriminator(nn.Module):
     def __init__(self, latent_dim, img_size, channels, subscripted_views):
         super(Generator, self).__init__()
         self.latent_dim = latent_dim
@@ -107,26 +135,26 @@ class Topo_Generator(nn.Module):
 
         return x
 
-class Discriminator(nn.Module):
-    def __init__(self, img_size, latent_dim):
-        super(Discriminator, self).__init__()
-        self.img_size = img_size
-        self.latent_dim = latent_dim
-        self.model = nn.Sequential(
-            nn.Linear(self.img_size**2 + self.latent_dim, 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(256, 1),
-            nn.Sigmoid()
-        )
+# class Discriminator(nn.Module):
+#     def __init__(self, img_size, latent_dim):
+#         super(Discriminator, self).__init__()
+#         self.img_size = img_size
+#         self.latent_dim = latent_dim
+#         self.model = nn.Sequential(
+#             nn.Linear(self.img_size**2 + self.latent_dim, 512),
+#             nn.LeakyReLU(0.2, inplace=True),
+#             nn.Linear(512, 256),
+#             nn.LeakyReLU(0.2, inplace=True),
+#             nn.Linear(256, 1),
+#             nn.Sigmoid()
+#         )
+#
+#     def forward(self, img, latent_vector):
+#         img_flat = img.view(img.size()[0], -1)
+#         validity = self.model(torch.cat([img_flat, latent_vector],1))
+#         return validity
 
-    def forward(self, img, latent_vector):
-        img_flat = img.view(img.size()[0], -1)
-        validity = self.model(torch.cat([img_flat, latent_vector],1))
-        return validity
-
-class Topo_Decoder(nn.Module):
+class Decoder(nn.Module):
     def __init__(self, img_size, latent_dim):
         super(Decoder, self).__init__()
         self.img_size = img_size
