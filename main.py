@@ -3,13 +3,15 @@ import os
 import math
 
 import numpy as np
+import gudhi
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torchvision.utils import save_image
 
-from generative_model.emma_ali import run_generative_adversarial_network
+
 from utils.utils import print_progress, get_sample_data, view_generated_data, get_MNIST, weights_init_normal
+# from generative_model.emma_ali import run_generative_adversarial_network
 from architecture.neural_nets import Generator, Discriminator, Decoder
 from architecture.neural_nets import train_discriminator, get_loss_generator, get_loss_discriminator
 from architecture.neural_nets import get_loss_wasserstein_discriminator, get_loss_wasserstein_generator
@@ -34,7 +36,6 @@ def parse_arguments():
     return parser.parse_args()
 
 def run_feature_adversarial_network(opt):
-        # import pdb; pdb.set_trace()
         data_loader = get_MNIST(opt)
 
         generator = Generator(opt.latent_dim, opt.img_size, opt.channels)
@@ -58,7 +59,6 @@ def run_feature_adversarial_network(opt):
 
         for epoch in range(opt.n_epochs):
             for i, (imgs, _) in enumerate(data_loader):
-
                 if cuda: imgs = imgs.type(torch.cuda.FloatTensor)
 
                 valid = Variable(Tensor(imgs.shape[0], 1).fill_(1.0), requires_grad=False)
@@ -81,7 +81,6 @@ def run_feature_adversarial_network(opt):
 
                 discriminator_solver.zero_grad()
                 discriminator_loss = get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z)
-                # import pdb; pdb.set_trace()
                 discriminator_loss.backward()
                 discriminator_solver.step()
 
@@ -95,6 +94,4 @@ def run_feature_adversarial_network(opt):
 
 if __name__=="__main__":
     opt = parse_arguments()
-    # import pdb; pdb.set_trace()
     run_feature_adversarial_network(opt)
-    # run_feature_adversarial_network(opt)
