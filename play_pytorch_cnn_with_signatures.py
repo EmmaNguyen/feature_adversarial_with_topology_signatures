@@ -11,9 +11,13 @@ import torchvision.transforms as transforms
 from src.small_norb.generate_dgm_provider import generate_dgm_provider
 from src.small_norb.experiments import experiment
 
+# Print version
+print("Package information: [ Torch ]       - [ {} ]".format(torch.__version__))
+print("Package information: [ Torchvision ] - [ {} ]".format(torchvision.__file__.split('/')[-3].split('-')[-2]))
+
 # Path to data
-provider_path = os.path.join(os.path.dirname(__file__), '../../data/mnist/dgm')
-raw_data_path = os.path.join(os.path.dirname(__file__), '../../data/mnist/raw')
+provider_path = os.path.join(os.path.dirname(__file__), './data/mnist/dgm')
+raw_data_path = os.path.join(os.path.dirname(__file__), './data/mnist/raw')
 
 # Device configuration
 # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
