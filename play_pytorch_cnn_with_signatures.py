@@ -29,15 +29,16 @@ batch_size = 100
 learning_rate = 0.001
 
 # MNIST dataset
-train_dataset = torchvision.datasets.MNIST(root='../../data/mnist/',
+# import pdb; pdb.set_trace()
+train_dataset = torchvision.datasets.MNIST(root='./data/mnist/',
                                            train=True,
                                            transform=transforms.ToTensor(),
                                            download=True)
 
-test_dataset = torchvision.datasets.MNIST(root='../../data/mnist/',
+test_dataset = torchvision.datasets.MNIST(root='./data/mnist/',
                                           train=False,
                                           transform=transforms.ToTensor())
-import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 dgm = generate_dgm_provider(raw_data_path, provider_path, 32)
 
 # Data loader
