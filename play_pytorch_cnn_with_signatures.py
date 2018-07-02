@@ -16,8 +16,8 @@ print("Package information: [ Torch ]       - [ {} ]".format(torch.__version__))
 print("Package information: [ Torchvision ] - [ {} ]".format(torchvision.__file__.split('/')[-3].split('-')[-2]))
 
 # Path to data
-provider_path = os.path.join(os.path.dirname(__file__), './data/mnist/dgm')
-raw_data_path = os.path.join(os.path.dirname(__file__), './data/mnist/raw')
+provider_path = os.path.join(os.path.dirname(__file__), './data/mnist/dgm/')
+raw_data_path = os.path.join(os.path.dirname(__file__), './data/mnist/raw/')
 
 # Device configuration
 # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -116,4 +116,4 @@ with torch.no_grad():
     print('Test Accuracy of the model on the 10000 test images: {} %'.format(100 * correct / total))
 
 # Save the model checkpoint
-torch.save(model.state_dict(), 'model.ckpt')
+torch.save(model.state_dict(), 'signatures_model.ckpt')
