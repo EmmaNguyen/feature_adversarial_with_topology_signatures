@@ -10,7 +10,6 @@ from architecture.neural_topo_nets import MyModel
 from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor
 
-opt.use_cuda = True if torch.cuda.is_available() else False
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -84,7 +83,7 @@ def _data_setup(opt):
 def experiment(data_path):
     opt = parse_arguments()
     opt.data_path = data_path
-
+    opt.use_cuda = True if torch.cuda.is_available() else False
     data_train, data_test, subscripted_views = _data_setup(opt)
     model = MyModel(subscripted_views)   #subscripted_views is a number of directions to reconstruct a image
     trainer = _create_trainer(model, opt, data_train, data_test)
