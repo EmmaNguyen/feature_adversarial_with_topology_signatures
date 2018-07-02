@@ -6,6 +6,11 @@ from torchvision import datasets
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
+def export_result(output_file, result):
+    with open(output_file, 'w+') as f:
+        for i, result in enumerate(results):
+            f.write("[ Experiment {0} ] - [ Average accuracy ]: {1}\n".format(i, result))
+
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
