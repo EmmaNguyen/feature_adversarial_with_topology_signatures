@@ -16,8 +16,11 @@ print("Package information: [ Torch ]       - [ {} ]".format(torch.__version__))
 print("Package information: [ Torchvision ] - [ {} ]".format(torchvision.__file__.split('/')[-3].split('-')[-2]))
 
 # Path to data
-provider_path = os.path.join(os.path.dirname(__file__), './data/mnist/dgm/')
-raw_data_path = os.path.join(os.path.dirname(__file__), './data/mnist/raw/')
+provider_path = os.path.join(os.path.dirname(__file__),
+                            './data/mnist/dgm/npht_test_small_norb_train_32dirs.h5')
+
+raw_data_path = os.path.join(os.path.dirname(__file__),
+                            './data/mnist/raw/')
 
 # Device configuration
 # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
