@@ -7,6 +7,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
+from utils.topo_utils import UpperDiagonalThresholdedLogTransform, pers_dgm_center_init
+from utils.persistent_homology_transform import SLayer, SLayerPHT, reduce_essential_dgm
 
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
