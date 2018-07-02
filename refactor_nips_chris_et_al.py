@@ -30,7 +30,7 @@ n_runs = 5
 
 def _create_trainer(model, opt, data_train, data_test):
     optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
-    loss = nn.CrossEntropyLoss()
+    loss = nn.CrossEntropyLoss()   #Todo: Change to binary cross entropy
     trainer = Trainer(model=model,
                          optimizer=optimizer,
                          loss=loss,
