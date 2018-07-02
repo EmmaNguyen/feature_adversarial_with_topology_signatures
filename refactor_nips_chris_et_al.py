@@ -14,6 +14,7 @@ from utils.utils import export_result
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, default=None, help='an absolute path to dgm (h5).')
+    parser.add_argument('--output_file', type=str, default="test_deployment.txt", help='filename of results from all experiments.')
     parser.add_argument('--num_epochs', type=int, default=300, help='a number of epochs, e.g. number of times running entire of data.')
     parser.add_argument('--momentum', type=float, default=0.7, help='a number indicating momentum.')
     parser.add_argument('--lr_start', type=float, default=0.1, help='a starting value of learning rate (lr) to be tried.')
