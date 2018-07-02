@@ -10,7 +10,6 @@ from architecture.neural_topo_nets import MyModel
 from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor
 
-
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, default=None, help='an absolute path to dgm (h5).')
@@ -30,7 +29,6 @@ raw_data_path = os.path.join(parent, 'data/raw_data/small_train/')
 print('Starting experiment...')
 accuracies = []
 n_runs = 5
-
 
 def _create_trainer(model, opt, data_train, data_test):
     optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
@@ -62,18 +60,6 @@ def _create_trainer(model, opt, data_train, data_test):
     prediction_monitor_test.register(trainer)
     trainer.prediction_monitor = prediction_monitor_test
     return trainer
-
-
-def _parameters():
-    return {'data_path': None,
-        'epochs': 300,
-        'momentum': 0.7,
-        'lr_start': 0.1,
-        'lr_ep_step': 20,
-        'lr_adaption': 0.5,
-        'test_ratio': 0.5,
-        'batch_size': 128,
-        'cuda': False}
 
 def _data_setup(opt):
     view_name_template = 'dim_0_dir_{}'
