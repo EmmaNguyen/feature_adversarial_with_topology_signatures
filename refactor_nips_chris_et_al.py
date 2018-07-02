@@ -1,4 +1,6 @@
 import os
+import math
+import argparse
 
 import torch
 import torch.nn as nn
@@ -8,6 +10,20 @@ from architecture.neural_topo_nets import MyModel
 from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor
 
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_path', type=str, default=None, help='an absolute path to dgm (h5).')
+    parser.add_argument('--num_epochs', type=int, default=300, help='a number of epochs, e.g. number of times running entire of data.')
+    parser.add_argument('--momentum', type=float, default=0.7, help='a number indicating momentum.')
+    parser.add_argument('--lr_start', type=float, default=0.1, help='a starting value of learning rate (lr) to be tried.')
+    parser.add_argument('--lr_step', type=float, default=20, help='a number of incremental steps in learning rate (lr).')
+    parser.add_argument('--lr_adaption', type=float, default=0.5, help='a coefficient to jump between values of learning rate (lr).')
+    parser.add_argument('--test_ratio', type=float, default=0.5, help='a ratio between test set and training set.')
+    parser.add_argument('--batch_size', type=int, default=128, help='a number indicating a batch size.')
+    parser.add_argument('--use_cuda', type=bool, default=False, help='True if use cuda, otherwise False')
+    return parser.parse_args()
+
 parent = "/home/emma/Research/GAN/nips2017/"
 provider_path = os.path.join(parent, 'data/dgm_provider/npht_small_train_32dirs.h5')
 raw_data_path = os.path.join(parent, 'data/raw_data/small_train/')
@@ -16,23 +32,24 @@ accuracies = []
 n_runs = 5
 
 
-def _create_trainer(model, params, data_train, data_test):
-    optimizer = optim.SGD(model.parameters(), lr=params['lr_start'],momentum=params['momentum'])
+def _create_trainer(model, opt, data_train, data_test):
+    optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
     loss = nn.CrossEntropyLoss()
     trainer = Trainer(model=model,
                          optimizer=optimizer,
                          loss=loss,
                          train_data=data_train,
-                         n_epochs=params['epochs'],
-                         cuda=params['cuda'],
+                         n_epochs=opt.num_epochs,
+                         cuda=opt.use_cuda,
                          variable_created_by_model=True)
 
     def determine_lr(self, **kwargs):
         """
+        Todo: check reference to find learning_rate
         """
         epoch = kwargs['epoch_count']
-        if epoch % params['lr_ep_step'] == 0:
-            return params['lr_start'] / 2 ** (epoch / params['lr_ep_step'])
+        if epoch % opt.lr_step == 0:
+            return params.lr_start / 2 ** (epoch / op.lr_step)
 
     lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
     lr_scheduler.register(trainer)
@@ -58,32 +75,33 @@ def _parameters():
         'batch_size': 128,
         'cuda': False}
 
-def _data_setup(params):
+def _data_setup(opt):
     view_name_template = 'dim_0_dir_{}'
     subscripted_views = sorted([view_name_template.format(i) for i in range(32)])
-    assert (str(len(subscripted_views)) in params['data_path'])
+    assert (str(len(subscripted_views)) in opt.data_path)
 
     print('Loading provider...')
     dataset = Provider()
-    dataset.read_from_h5(params['data_path'])
+    dataset.read_from_h5(opt.data_path)
 
     assert all(view_name in dataset.view_names for view_name in subscripted_views)
 
     print('Create data loader...')
     data_train, data_test = train_test_from_dataset(dataset,
-                                                    test_size=params['test_ratio'],
-                                                    batch_size=params['batch_size'])
+                                                    test_size=opt.test_ratio,
+                                                    batch_size=opt.batch_size)
 
     return data_train, data_test, subscripted_views
 
 def experiment(data_path):
-    params = _parameters()
-    params['data_path'] = data_path
+    # params = _parameters()
+    opt = parse_arguments()
+    opt.data_path = data_path
     if torch.cuda.is_available():
-        params['cuda'] = True
-    data_train, data_test, subscripted_views = _data_setup(params)
+        opt.use_cuda = True
+    data_train, data_test, subscripted_views = _data_setup(opt)
     model = MyModel(subscripted_views)   #subscripted_views is a number of directions to reconstruct a image
-    trainer = _create_trainer(model, params, data_train, data_test)
+    trainer = _create_trainer(model, opt, data_train, data_test)
     trainer.run()
     last_10_accuracies = list(trainer.prediction_monitor.accuracies.values())[-10:]
     mean = np.mean(last_10_accuracies)
