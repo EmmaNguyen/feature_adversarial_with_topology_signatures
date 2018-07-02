@@ -49,3 +49,8 @@ Try with `dipha`
 ```bash
 gcc dipha
 ```
+
+### How to run a file
+```
+python refactor_nips_chris_et_al.py --data_path=/home/emma/Research/GAN/nips2017/data/dgm_provider/npht_small_train_32dirs.h5
+```

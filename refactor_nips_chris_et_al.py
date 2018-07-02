@@ -24,9 +24,6 @@ def parse_arguments():
     parser.add_argument('--use_cuda', type=bool, default=False, help='True if use cuda, otherwise False')
     return parser.parse_args()
 
-parent = "/home/emma/Research/GAN/nips2017/"
-provider_path = os.path.join(parent, 'data/dgm_provider/npht_small_train_32dirs.h5')
-raw_data_path = os.path.join(parent, 'data/raw_data/small_train/')
 print('Starting experiment...')
 accuracies = []
 n_runs = 5
@@ -80,9 +77,8 @@ def _data_setup(opt):
 
     return data_train, data_test, subscripted_views
 
-def experiment(data_path):
+def experiment():
     opt = parse_arguments()
-    opt.data_path = data_path
     opt.use_cuda = True if torch.cuda.is_available() else False
     data_train, data_test, subscripted_views = _data_setup(opt)
     model = MyModel(subscripted_views)   #subscripted_views is a number of directions to reconstruct a image
@@ -94,7 +90,7 @@ def experiment(data_path):
 
 for i in range(1, n_runs + 1):
     print('Start run {}'.format(i))
-    result = experiment(provider_path)
+    result = experiment()
     accuracies.append(result)
 
 with open(os.path.join(os.path.dirname(__file__), 'result_animal.txt'), 'w') as f:
