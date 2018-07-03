@@ -6,10 +6,10 @@ from torchvision import datasets
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-def export_result(output_file, result):
-    with open(output_file, 'w+') as f:
-        for i, result in enumerate(results):
-            f.write("[ Experiment {0} ] - [ Average accuracy ]: {1}\n".format(i, result))
+def export_result(output_file, result, overwrite):
+    writting_mode = 'w' if overwrite else 'a'
+    with open(output_file, writting_mode) as f:
+        f.write("[ Average accuracy ]: {:.3f} %\n".format(result * 100))
 
 def weights_init_normal(m):
     classname = m.__class__.__name__
