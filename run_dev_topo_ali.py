@@ -82,17 +82,17 @@ def run_adversarial_learning_topo_features(opt):
         discriminator.apply(weights_init_normal)
         discriminator_solver = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
-        decoder = SimpleConvNetEncoder(opt.img_size, opt.latent_dim)
-        decoder.apply(weights_init_normal)
-        decoder_solver = torch.optim.Adam(decoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+        encoder = SimpleConvNetEncoder(opt.img_size, opt.latent_dim)
+        encoder.apply(weights_init_normal)
+        encoder_solver = torch.optim.Adam(decoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
+        adversarial_loss = nn.BCELoss()
 
         if cuda:
             generator.cuda()
             discriminator.cuda()
+            encoder.cuda()
             adversarial_loss.cuda()
-
-        adversarial_loss = nn.BCELoss()
 
         for epoch in range(opt.num_epochs):
             for i, (imgs, _) in enumerate(data_loader):
