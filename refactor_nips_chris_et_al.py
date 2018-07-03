@@ -43,7 +43,7 @@ def _create_trainer(model, opt, data_train, data_test):
         """
         epoch = kwargs['epoch_count']
         if epoch % opt.lr_step == 0:
-            return params.lr_start / 2 ** (epoch / op.lr_step)
+            return opt.lr_start / 2 ** (epoch / opt.lr_step)
 
     lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
     lr_scheduler.register(trainer)
