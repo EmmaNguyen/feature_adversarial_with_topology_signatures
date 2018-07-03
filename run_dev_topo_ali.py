@@ -84,7 +84,7 @@ def run_adversarial_learning_topo_features(opt):
 
         encoder = SimpleConvNetEncoder(opt.img_size, opt.latent_dim)
         encoder.apply(weights_init_normal)
-        encoder_solver = torch.optim.Adam(decoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+        encoder_solver = torch.optim.Adam(encoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
         adversarial_loss = nn.BCELoss()
 
@@ -111,7 +111,7 @@ def run_adversarial_learning_topo_features(opt):
 
                 # Generate a batch of images
                 fake_imgs = generator(z)
-                fake_z = decoder(real_imgs)
+                fake_z = encoder(real_imgs)
 
                 generator_loss = get_loss_generator(discriminator, fake_imgs, z, real_imgs, fake_z)
                 generator_loss.backward()
