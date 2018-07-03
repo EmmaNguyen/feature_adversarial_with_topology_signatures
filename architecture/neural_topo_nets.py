@@ -13,9 +13,9 @@ from utils.persistent_homology_transform import SLayer, SLayerPHT, reduce_essent
 cuda = True if torch.cuda.is_available() else False
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-class MyModel(torch.nn.Module):
+class PHConvNet(torch.nn.Module):
     def __init__(self, subscripted_views):
-        super(MyModel, self).__init__()
+        super(PHConvNet, self).__init__()
         self.subscripted_views = subscripted_views
         n_elements = 75
         n_filters = 32
