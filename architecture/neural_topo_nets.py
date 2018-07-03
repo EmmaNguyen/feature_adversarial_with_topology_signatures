@@ -68,9 +68,9 @@ class PHConvNet(torch.nn.Module):
         x = self.linear_2(x)
         return x
 
-class ConvNet(nn.Module):
+class ConvNetDecoder(nn.Module):
     def __init__(self, latent_dim, img_size, channels):
-        super(ConvNet, self).__init__()
+        super(ConvNetDecoder, self).__init__()
         self.latent_dim = latent_dim
         self.img_size = img_size
         self.channels = channels
@@ -99,9 +99,9 @@ class ConvNet(nn.Module):
 
         return img
 
-class SimpleConvNet(nn.Module):
+class SimpleConvNetEncoder(nn.Module):
     def __init__(self, img_size, latent_dim):
-        super(SimpleConvNet, self).__init__()
+        super(SimpleConvNetEncoder, self).__init__()
         self.img_size = img_size
         self.latent_dim = latent_dim
         self.model = nn.Sequential(
@@ -117,12 +117,6 @@ class SimpleConvNet(nn.Module):
         img_flat = img.view(img.size()[0], -1)
         validity = self.model(img_flat) #64x784
         return validity
-
-def train_ConvNet(model, imgs, latent_vector):
-    # imgs = imgs.view(imgs.size()[0], -1)
-    # vector = torch.cat([imgs, latent_vector], 1)
-    # return discriminator(vector)
-    return model(imgs, latent_vector)
 
 def train_PHConvNet(model, opt, data_train, data_test):
     optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
@@ -155,6 +149,11 @@ def train_PHConvNet(model, opt, data_train, data_test):
     trainer.prediction_monitor = prediction_monitor_test
     return trainer
 
+def train_discriminator(discriminator, imgs, latent_vector):
+    # imgs = imgs.view(imgs.size()[0], -1)
+    # vector = torch.cat([imgs, latent_vector], 1)
+    # return discriminator(vector)
+    return discriminator(imgs, latent_vector)
 
 def get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z):
     adversarial_loss = nn.BCELoss()

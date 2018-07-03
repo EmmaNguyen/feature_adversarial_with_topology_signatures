@@ -8,9 +8,9 @@ import torch.nn as nn
 from torch import optim
 from torch.autograd import Variable
 
-from architecture.neural_topo_nets import PHConvNet, ConvNet, SimpleConvNet
+from architecture.neural_topo_nets import PHConvNet, ConvNetDecoder, SimpleConvNetEncoder, train_PHConvNet
 from architecture.neural_topo_nets import get_loss_discriminator, get_loss_generator
-from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler, train_PHConvNet
+from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor
 from utils.utils import export_result
 from utils.utils import get_MNIST, weights_init_normal
@@ -74,7 +74,7 @@ def run_adversarial_learning_topo_features(opt):
         data_loader = get_MNIST(opt)
         data_train, data_test, subscripted_views = load_data(opt)
 
-        generator = ConvNet(opt.latent_dim, opt.img_size, opt.channels)
+        generator = ConvNetDecoder(opt.latent_dim, opt.img_size, opt.channels)
         generator.apply(weights_init_normal)
         generator_solver = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
@@ -82,7 +82,7 @@ def run_adversarial_learning_topo_features(opt):
         discriminator.apply(weights_init_normal)
         discriminator_solver = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
-        decoder = SimpleConvNet(opt.img_size, opt.latent_dim)
+        decoder = SimpleConvNetEncoder(opt.img_size, opt.latent_dim)
         decoder.apply(weights_init_normal)
         decoder_solver = torch.optim.Adam(decoder.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 

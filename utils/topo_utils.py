@@ -487,36 +487,36 @@ def pers_dgm_center_init(n_elements):
             centers.append(x.tolist())
     return torch.Tensor(centers)
 
-def train_PHConvNet(model, opt, data_train, data_test):
-    optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
-    loss = nn.CrossEntropyLoss()   #Todo: Change to binary cross entropy
-    trainer = Trainer(model=model,
-                      optimizer=optimizer,
-                      loss=loss,
-                      train_data=data_train,
-                      n_epochs=opt.num_epochs,
-                      cuda=torch.cuda.is_available(),
-                      variable_created_by_model=True)
-
-    def determine_lr(self, **kwargs):
-        """
-        Todo: check reference to find learning_rate
-        """
-        epoch = kwargs['epoch_count']
-        if epoch % opt.lr_step == 0:
-            return params.lr_start / 2 ** (epoch / op.lr_step)
-
-    lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
-    lr_scheduler.register(trainer)
-    progress = ConsoleBatchProgress()
-    progress.register(trainer)
-    prediction_monitor_test = PredictionMonitor(data_test,
-                                                verbose=True,
-                                                eval_every_n_epochs=1,
-                                                variable_created_by_model=True)
-    prediction_monitor_test.register(trainer)
-    trainer.prediction_monitor = prediction_monitor_test
-    return trainer
+# def train_PHConvNet(model, opt, data_train, data_test):
+#     optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
+#     loss = nn.CrossEntropyLoss()   #Todo: Change to binary cross entropy
+#     trainer = Trainer(model=model,
+#                       optimizer=optimizer,
+#                       loss=loss,
+#                       train_data=data_train,
+#                       n_epochs=opt.num_epochs,
+#                       cuda=torch.cuda.is_available(),
+#                       variable_created_by_model=True)
+#
+#     def determine_lr(self, **kwargs):
+#         """
+#         Todo: check reference to find learning_rate
+#         """
+#         epoch = kwargs['epoch_count']
+#         if epoch % opt.lr_step == 0:
+#             return params.lr_start / 2 ** (epoch / op.lr_step)
+#
+#     lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
+#     lr_scheduler.register(trainer)
+#     progress = ConsoleBatchProgress()
+#     progress.register(trainer)
+#     prediction_monitor_test = PredictionMonitor(data_test,
+#                                                 verbose=True,
+#                                                 eval_every_n_epochs=1,
+#                                                 variable_created_by_model=True)
+#     prediction_monitor_test.register(trainer)
+#     trainer.prediction_monitor = prediction_monitor_test
+#     return trainer
 
 from torch.optim import Optimizer
 from typing import Callable
