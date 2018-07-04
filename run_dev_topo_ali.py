@@ -68,7 +68,7 @@ def main():
 
     for i in range(1, opt.num_experiment + 1):
         print('[ Run experiment {} ]'.format(i))
-        adversarial_nets = AdversarialTopologicalLearningNets(generator, discriminator, encoder, adversarial_loss, opt)
+        adversarial_nets = AdversarialTopologicalLearningNets(generator, discriminator, encoder, opt.latent_dim, adversarial_loss)
         adversarial_nets.train(data_loader, opt.num_epochs, opt.lr, opt.b1, opt.b2)  #Adam optimizer
         average_ten_accuracy = adversarial_nets.top_accuracies(k=10, scoring='accuracy')/ 10.0
         export_result(opt.output_file, average_ten_accuracy, opt.writing_mode)
