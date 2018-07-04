@@ -182,3 +182,54 @@ def get_loss_wasserstein_discriminator(discriminator, fake_imgs, z, real_imgs, f
 
 def get_loss_wasserstein_generator(discriminator, fake_imgs, z, real_imgs, fake_z):
     return torch.mean(discriminator(fake_imgs, z))
+
+def get_geometric_score():
+    None
+
+class AdversarialTopologicalLearningNets(object):
+    def __init__(self, generator, discriminator, encoder, latent_dim, adversarial_loss):
+        self.discriminator = discriminator
+        self.generator = generator
+        self.encoder = encoder
+        self.latent_dim = latent_dim
+        # self.adversarial_loss = adversarial_loss
+
+    def train(self, data_loader, num_epochs, lr, b1, b2):
+        generator_solver = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
+        discriminator_solver = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        encoder_solver = torch.optim.Adam(self.encoder.parameters(), lr=lr, betas=(b1, b2))
+
+        for epoch in range(num_epochs):
+            for i, (imgs, _) in enumerate(data_loader):
+                if cuda: imgs = imgs.type(torch.cuda.FloatTensor)
+
+                valid = Variable(Tensor(imgs.shape[0], 1).fill_(1.0), requires_grad=False)
+                fake = Variable(Tensor(imgs.shape[0], 1).fill_(0.0), requires_grad=False)
+
+                real_imgs = Variable(imgs)
+
+                generator_solver.zero_grad()
+
+                # Sample noise as generator input
+                z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], self.latent_dim))))
+
+                # Generate a batch of images
+                fake_imgs = self.generator(z)
+                fake_z = self.encoder(real_imgs)
+
+                generator_loss = get_loss_generator(discriminator, fake_imgs, z, real_imgs, fake_z)
+                generator_loss.backward()
+                generator_solver.step()
+
+                discriminator_solver.zero_grad()
+                discriminator_loss = get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z)
+                self.discriminator_loss.backward()
+                self.discriminator_solver.step()
+
+                print ("[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]" % (epoch, num_epochs, i, len(data_loader),
+                                                                discriminator_loss.data.item(), generator_loss.data.item()))
+
+                batches_done = epoch * len(data_loader) + i
+
+                if batches_done % opt.sample_interval == 0:
+                    save_image(fake_imgs.data[:25], 'images/%d.png' % batches_done, nrow=5, normalize=True)
