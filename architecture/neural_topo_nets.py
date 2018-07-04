@@ -1,11 +1,12 @@
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.autograd import Variable
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 from torch.utils.data import DataLoader
 from torchvision import datasets
-from torch.autograd import Variable
-import torch.nn as nn
-import torch.nn.functional as F
-import torch
 
 from utils.topo_utils import UpperDiagonalThresholdedLogTransform, pers_dgm_center_init
 from utils.persistent_homology_transform import SLayer, SLayerPHT, reduce_essential_dgm
