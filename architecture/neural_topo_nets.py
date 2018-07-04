@@ -119,7 +119,7 @@ class SimpleConvNetEncoder(nn.Module):
         validity = self.model(img_flat) #64x784
         return validity
 
-def train_PHConvNet(model, opt, data_train, data_test):
+def train_PHConvNet(opt, model, data_train):
     optimizer = optim.SGD(model.parameters(), lr=opt.lr_start, momentum=opt.momentum)
     loss = nn.CrossEntropyLoss()   #Todo: Change to binary cross entropy
     trainer = Trainer(model=model,
@@ -130,24 +130,24 @@ def train_PHConvNet(model, opt, data_train, data_test):
                       cuda=torch.cuda.is_available(),
                       variable_created_by_model=True)
 
-    def determine_lr(self, **kwargs):
-        """
-        Todo: check reference to find learning_rate
-        """
-        epoch = kwargs['epoch_count']
-        if epoch % opt.lr_step == 0:
-            return params.lr_start / 2 ** (epoch / op.lr_step)
-
-    lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
-    lr_scheduler.register(trainer)
-    progress = ConsoleBatchProgress()
-    progress.register(trainer)
-    prediction_monitor_test = PredictionMonitor(data_test,
-                                                verbose=True,
-                                                eval_every_n_epochs=1,
-                                                variable_created_by_model=True)
-    prediction_monitor_test.register(trainer)
-    trainer.prediction_monitor = prediction_monitor_test
+    # def determine_lr(self, **kwargs):
+    #     """
+    #     Todo: check reference to find learning_rate
+    #     """
+    #     epoch = kwargs['epoch_count']
+    #     if epoch % opt.lr_step == 0:
+    #         return params.lr_start / 2 ** (epoch / op.lr_step)
+    #
+    # lr_scheduler = LearningRateScheduler(determine_lr, verbose=True)
+    # lr_scheduler.register(trainer)
+    # progress = ConsoleBatchProgress()
+    # progress.register(trainer)
+    # prediction_monitor_test = PredictionMonitor(data_test,
+    #                                             verbose=True,
+    #                                             eval_every_n_epochs=1,
+    #                                             variable_created_by_model=True)
+    # prediction_monitor_test.register(trainer)
+    # trainer.prediction_monitor = prediction_monitor_test
     return trainer
 
 def train_discriminator(discriminator, imgs, latent_vector):
