@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 
-from architecture.neural_topo_nets import MyModel
+from architecture.neural_topo_nets import PHConvNet
 from utils.topo_utils import Provider, train_test_from_dataset, Trainer, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor
 from utils.utils import export_result
@@ -76,7 +76,7 @@ def run_experiment(opt):
     data_train, data_test, subscripted_views = load_data(opt)
     for i in range(1, opt.num_experiment + 1):
         print('[ Run experiment {} ]'.format(i))
-        model = MyModel(subscripted_views)   #subscripted_views is a number of directions to reconstruct a image
+        model = PHConvNet(subscripted_views)   #subscripted_views is a number of directions to reconstruct a image
         trainer = _create_trainer(model, opt, data_train, data_test)
         trainer.run()
         last_ten_accuracies = list(trainer.prediction_monitor.accuracies.values())[-10:]
