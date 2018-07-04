@@ -156,17 +156,17 @@ def train_discriminator(discriminator, imgs, latent_vector):
     # return discriminator(vector)
     return discriminator(imgs, latent_vector)
 
-def get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z):
+def get_loss_discriminator(opt, discriminator, fake_imgs, z, real_imgs, fake_z):
     adversarial_loss = nn.BCELoss()
     # minibatch_size = discriminator_real.size()[0]
     minibatch_size = real_imgs.size()[0]
     valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
     fake = Variable(Tensor(minibatch_size, 1).fill_(0.0), requires_grad=False)
-    real_loss = adversarial_loss(train_PHConvNet(discriminator, real_imgs, fake_z), valid)
-    fake_loss = adversarial_loss(train_PHConvNet(discriminator, fake_imgs.detach(), z), fake)
+    real_loss = adversarial_loss(train_PHConvNet(opt, discriminator, real_imgs, fake_z), valid)
+    fake_loss = adversarial_loss(train_PHConvNet(opt, discriminator, fake_imgs.detach(), z), fake)
     return (real_loss + fake_loss) / 2
 
-def get_loss_generator(discriminator, fake_imgs, z, real_imgs, fake_z):
+def get_loss_generator(opt, discriminator, fake_imgs, z, real_imgs, fake_z):
     objection = nn.BCELoss()
     minibatch_size = fake_imgs.size()[0]
     # minibatch_size = self.batch_size
