@@ -4,6 +4,11 @@ This version is still being tested and in development.
 Author: Emma Nguyen
 
 Original code: https://github.com/c-hofer/nips2017
+
+Usage:
+
+python refactor_nips_chris_et_al.py --data_path=<path_h5_file>
+
 """
 
 import os
