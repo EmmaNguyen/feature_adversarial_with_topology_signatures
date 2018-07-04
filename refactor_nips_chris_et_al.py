@@ -1,3 +1,11 @@
+"""
+Refactorization of Deep Learning with Topological Signatures
+This version is still being tested and in development.
+Author: Emma Nguyen
+
+Original code: https://github.com/c-hofer/nips2017
+"""
+
 import os
 import math
 import argparse
