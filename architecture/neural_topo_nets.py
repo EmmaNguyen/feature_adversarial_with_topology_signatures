@@ -8,7 +8,7 @@ from torchvision.utils import save_image
 from torch.utils.data import DataLoader
 from torchvision import datasets
 
-from utils.topo_utils import UpperDiagonalThresholdedLogTransform, pers_dgm_center_init
+from utils.topo_utils import UpperDiagonalThresholdedLogTransform, pers_dgm_center_init, Trainer
 from utils.persistent_homology_transform import SLayer, SLayerPHT, reduce_essential_dgm
 
 cuda = True if torch.cuda.is_available() else False
@@ -152,13 +152,15 @@ class AdversarialTopologicalLearningNets(object):
                 fake_imgs = self.generator(z)
                 fake_z = self.encoder(real_imgs)
 
-                generator_loss = get_loss_generator(fake_imgs, z, real_imgs, fake_z)
-                generator_loss.backward()
+                # generator_loss = get_loss_generator(fake_imgs, z, real_imgs, fake_z)
+                # generator_loss.backward()
+                self.get_loss_generator(fake_imgs, z, real_imgs, fake_z)#.backward()
                 self.generator_solver.step()
 
                 self.discriminator_solver.zero_grad()
-                discriminator_loss = get_loss_discriminator(fake_imgs, z, real_imgs, fake_z)
-                self.discriminator_loss.backward()
+                # discriminator_loss = get_loss_discriminator(fake_imgs, z, real_imgs, fake_z)
+                # self.discriminator_loss.backward()
+                self.get_loss_discriminator(fake_imgs, z, real_imgs, fake_z)#.backward()
                 self.discriminator_solver.step()
 
                 print ("[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]" % (epoch, num_epochs, i, len(data_loader),
@@ -169,25 +171,29 @@ class AdversarialTopologicalLearningNets(object):
                 if batches_done % opt.sample_interval == 0:
                     save_image(fake_imgs.data[:25], 'images/%d.png' % batches_done, nrow=5, normalize=True)
 
-        def train_PHConvNet(self, img, z):
-            return Trainer(model=self.discriminator,
-                              optimizer=self.discriminator_solver,
-                              loss=self.adversarial_loss,
-                              train_data=torch.cat((img, z), 1),
-                              n_epochs=opt.num_epochs,
-                              cuda=True,
-                              variable_created_by_model=True)
+    def train_PHConvNet(self, img, z):
+        minibatch_size = img.size()[0]
+        trainer = Trainer(model=self.discriminator,
+                          optimizer=self.discriminator_solver,
+                          loss=self.adversarial_loss,
+                          train_data=torch.cat((z.view(minibatch_size, -1),
+                                                img.view(minibatch_size, -1)), 1),
+                          n_epochs=1,
+                          cuda=torch.cuda.is_available(),
+                          variable_created_by_model=True)
+        trainer.run()
+        return trainer
 
-        def get_loss_discriminator(self, fake_imgs, z, real_imgs, fake_z):
-            minibatch_size = real_imgs.size()[0]
-            valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
-            fake = Variable(Tensor(minibatch_size, 1).fill_(0.0), requires_grad=False)
-            real_loss = self.adversarial_loss(train_PHConvNet(real_imgs, fake_z), valid)
-            fake_loss = self.adversarial_loss(train_PHConvNet(fake_imgs.detach(), z), fake)
-            return (real_loss + fake_loss) / 2
+    def get_loss_discriminator(self, fake_imgs, z, real_imgs, fake_z):
+        minibatch_size = real_imgs.size()[0]
+        valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
+        fake = Variable(Tensor(minibatch_size, 1).fill_(0.0), requires_grad=False)
+        real_loss = self.adversarial_loss(self.train_PHConvNet(real_imgs, fake_z)[1], valid) / 2
+        fake_loss = self.adversarial_loss(self.train_PHConvNet(fake_imgs.detach(), z)[1], fake) / 2
+        return (real_loss + fake_loss).backward()
 
-        def get_loss_generator(self, fake_imgs, z, real_imgs, fake_z):
-            minibatch_size = fake_imgs.size()[0]
-            valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
-            valid_prediction = train_PHConvNet(fake_imgs, z)
-            return self.adversarial_loss(valid_prediction, valid)
+    def get_loss_generator(self, fake_imgs, z, real_imgs, fake_z):
+        minibatch_size = fake_imgs.size()[0]
+        valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
+        valid_prediction = self.train_PHConvNet(fake_imgs, z)[1]
+        return self.adversarial_loss(valid_prediction, valid).backward()
