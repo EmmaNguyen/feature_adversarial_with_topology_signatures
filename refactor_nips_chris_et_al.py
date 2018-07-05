@@ -73,7 +73,7 @@ def _create_trainer(model, opt, data_train, data_test):
 def load_data(opt):
     view_name_template = 'dim_0_dir_{}'
     subscripted_views = sorted([view_name_template.format(i) for i in range(32)])
-    assert (str(len(subscripted_views)) in opt.data_path)
+
     print("[ Load provider data ]")
     dataset = Provider()
     dataset.read_from_h5(opt.data_path)
