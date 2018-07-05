@@ -126,13 +126,14 @@ class AdversarialTopologicalLearningNets(object):
         self.generator = generator
         self.encoder = encoder
         self.latent_dim = latent_dim
-        # self.adversarial_loss = adversarial_loss
+        self.adversarial_loss = adversarial_loss
+
+    def set_momentum_solver(self, lr, b1, b2):
+        self.generator_solver = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
+        self.discriminator_solver = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        self.encoder_solver = torch.optim.Adam(self.encoder.parameters(), lr=lr, betas=(b1, b2))
 
     def train(self, data_loader, num_epochs, lr, b1, b2):
-        generator_solver = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
-        discriminator_solver = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
-        encoder_solver = torch.optim.Adam(self.encoder.parameters(), lr=lr, betas=(b1, b2))
-
         for epoch in range(num_epochs):
             for i, (imgs, _) in enumerate(data_loader):
                 if cuda: imgs = imgs.type(torch.cuda.FloatTensor)
@@ -142,7 +143,7 @@ class AdversarialTopologicalLearningNets(object):
 
                 real_imgs = Variable(imgs)
 
-                generator_solver.zero_grad()
+                self.generator_solver.zero_grad()
 
                 # Sample noise as generator input
                 z = Variable(Tensor(np.random.normal(0, 1, (imgs.shape[0], self.latent_dim))))
@@ -151,12 +152,12 @@ class AdversarialTopologicalLearningNets(object):
                 fake_imgs = self.generator(z)
                 fake_z = self.encoder(real_imgs)
 
-                generator_loss = get_loss_generator(discriminator, fake_imgs, z, real_imgs, fake_z)
+                generator_loss = get_loss_generator(fake_imgs, z, real_imgs, fake_z)
                 generator_loss.backward()
-                generator_solver.step()
+                self.generator_solver.step()
 
-                discriminator_solver.zero_grad()
-                discriminator_loss = get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z)
+                self.discriminator_solver.zero_grad()
+                discriminator_loss = get_loss_discriminator(fake_imgs, z, real_imgs, fake_z)
                 self.discriminator_loss.backward()
                 self.discriminator_solver.step()
 
@@ -167,3 +168,26 @@ class AdversarialTopologicalLearningNets(object):
 
                 if batches_done % opt.sample_interval == 0:
                     save_image(fake_imgs.data[:25], 'images/%d.png' % batches_done, nrow=5, normalize=True)
+
+        def train_PHConvNet(self, img, z):
+            return Trainer(model=self.discriminator,
+                              optimizer=self.discriminator_solver,
+                              loss=self.adversarial_loss,
+                              train_data=torch.cat((img, z), 1),
+                              n_epochs=opt.num_epochs,
+                              cuda=True,
+                              variable_created_by_model=True)
+
+        def get_loss_discriminator(self, fake_imgs, z, real_imgs, fake_z):
+            minibatch_size = real_imgs.size()[0]
+            valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
+            fake = Variable(Tensor(minibatch_size, 1).fill_(0.0), requires_grad=False)
+            real_loss = self.adversarial_loss(train_PHConvNet(real_imgs, fake_z), valid)
+            fake_loss = self.adversarial_loss(train_PHConvNet(fake_imgs.detach(), z), fake)
+            return (real_loss + fake_loss) / 2
+
+        def get_loss_generator(self, fake_imgs, z, real_imgs, fake_z):
+            minibatch_size = fake_imgs.size()[0]
+            valid = Variable(Tensor(minibatch_size, 1).fill_(1.0), requires_grad=False)
+            valid_prediction = train_PHConvNet(fake_imgs, z)
+            return self.adversarial_loss(valid_prediction, valid)
