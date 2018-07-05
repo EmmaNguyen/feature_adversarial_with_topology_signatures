@@ -16,6 +16,11 @@ mkl=2018 pytorch=0.3.0 -c pytorch -c intel
 ```
 conda install pytorch torchvision -c pytorch
 ```
+
+If running GPUs, please check that you have a appropriate set up as mine to prevent any headache troublesome by running this unittest.
+```
+python unittests/test_torch_setting.py
+```
 #### Source file from github
 
 ```
