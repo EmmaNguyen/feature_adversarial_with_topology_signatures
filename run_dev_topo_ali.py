@@ -8,8 +8,7 @@ import torch.nn as nn
 from torch import optim
 from torch.autograd import Variable
 
-from architecture.neural_topo_nets import PHConvNet, ConvNetDecoder, SimpleConvNetEncoder, train_PHConvNet, AdversarialTopologicalLearningNets
-from architecture.neural_topo_nets import get_loss_discriminator, get_loss_generator
+from architecture.neural_topo_nets import PHConvNet, ConvNetDecoder, SimpleConvNetEncoder, AdversarialTopologicalLearningNets
 from utils.topo_utils import Provider, train_test_from_dataset, LearningRateScheduler
 from utils.topo_utils import ConsoleBatchProgress, PredictionMonitor, load_dgm_data
 from utils.utils import export_result

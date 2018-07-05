@@ -657,3 +657,7 @@ class Trainer(object):
         batch_targets = cast(batch_targets)
         batch_input, batch_targets = self.after_data_typing_hook(batch_input, batch_targets)
         return batch_input, batch_targets
+#
+#
+# import chofer_torchex.utils.trainer as tr
+# from chofer_torchex.utils.trainer.plugins import *
