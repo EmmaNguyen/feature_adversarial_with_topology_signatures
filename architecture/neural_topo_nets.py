@@ -133,7 +133,7 @@ class AdversarialTopologicalLearningNets(object):
         self.discriminator_solver = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
         self.encoder_solver = torch.optim.Adam(self.encoder.parameters(), lr=lr, betas=(b1, b2))
 
-    def train(self, data_loader, num_epochs, lr, b1, b2):
+    def train(self, data_loader, num_epochs):
         for epoch in range(num_epochs):
             for i, (imgs, _) in enumerate(data_loader):
                 if cuda: imgs = imgs.type(torch.cuda.FloatTensor)
