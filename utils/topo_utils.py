@@ -35,6 +35,20 @@ from chofer_torchex.utils.trainer.plugins import *
 
 DGM_MIN_PERSISTENCE_THRESHOLD = 0.01
 
+def load_dgm_data(opt):
+    view_name_template = 'dim_0_dir_{}'
+    subscripted_views = sorted([view_name_template.format(i) for i in range(32)])
+
+    print("[ Load provider data ]")
+    dataset = Provider()
+    dataset.read_from_h5(opt.dgm_data_path)
+    assert all(view_name in dataset.view_names for view_name in subscripted_views)
+    print("[ Create data loader]")
+    data_train, data_test = train_test_from_dataset(dataset,
+                                                    test_size=opt.test_ratio,
+                                                    batch_size=opt.batch_size)
+    return data_train, data_test, subscripted_views
+
 def reduce_to_largest_connected_component(img):
     label_map, n = skimage.morphology.label(img, neighbors=4, background=0, return_num=True)
     volumes = []
@@ -55,20 +69,6 @@ def threhold_dgm(dgm):
 
 # In[3]:
 
-
-def load_dgm_data(opt):
-    view_name_template = 'dim_0_dir_{}'
-    subscripted_views = sorted([view_name_template.format(i) for i in range(32)])
-    assert (str(len(subscripted_views)) in opt.dgm_data_path)
-    print("[ Load provider data ]")
-    dataset = Provider()
-    dataset.read_from_h5(opt.dgm_data_path)
-    assert all(view_name in dataset.view_names for view_name in subscripted_views)
-    print("[ Create data loader]")
-    data_train, data_test = train_test_from_dataset(dataset,
-                                                    test_size=opt.test_ratio,
-                                                    batch_size=opt.batch_size)
-    return data_train, data_test, subscripted_views
 
 class ProviderError(Exception):
     pass
