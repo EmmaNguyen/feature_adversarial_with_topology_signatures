@@ -69,6 +69,7 @@ def geom_score(rlts1, rlts2):
        Float, a number representing topological similarity of two datasets.
 
     """
-    mrlt1 = np.mean(rlts1, axis=0)
-    mrlt2 = np.mean(rlts2, axis=0)
-    return np.sum((mrlt1 - mrlt2) ** 2)
+    #mrlt1 = np.mean(rlts1, axis=0)
+    #mrlt2 = np.mean(rlts2, axis=0)
+    #return np.sum((mrlt1 - mrlt2) ** 2)
+    return (rlts1 - rlts2) ** 2

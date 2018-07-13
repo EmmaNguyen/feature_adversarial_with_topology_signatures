@@ -83,7 +83,7 @@ def geometry_score(X, Y):
     else:
         rlts1 = rlts(X.data.numpy(), n=mb_size)
         rlts2 = rlts(Y.data.numpy(), n=mb_size)
-    return Variable(Tensor(mb_size, 1).fill_(geom_score(rlts1, rlts2)),
+    return Variable(Tensor(geom_score(rlts1, rlts2)),
                     requires_grad=False)
 
 # metric_regularized = l2_distance
@@ -147,7 +147,7 @@ for it in range(1000000):
     reset_grad()
 
     # Print and plot every now and then
-    if it % 10 == 0:
+    if it % 1000 == 0:
         print('Iter-{}; D_loss: {}; E_loss: {}; G_loss: {}'
               .format(it, D_loss.data.numpy(), E_loss.data.numpy(), G_loss.data.numpy()))
 
