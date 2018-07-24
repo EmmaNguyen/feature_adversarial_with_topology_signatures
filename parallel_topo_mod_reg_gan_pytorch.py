@@ -92,10 +92,10 @@ def gromov_wasserstein_distance(X, Y):
     C2 = sp.spatial.distance.cdist(Y.data.cpu().numpy(), Y.data.cpu().numpy())
     C1 /= C1.max()
     C2 /= C2.max()
-    p = unif(32)
-    q = unif(32)
-    import pdb; pdb.set_trace()
-    return Variable(Tensor(gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4)),
+    p = unif(mb_size)
+    q = unif(mb_size)
+#    import pdb; pdb.set_trace()
+    return Variable(Tensor(mb_size, 0).fill_(gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4)),
                     requires_grad=False)
 
 # metric_regularized = l2_distance
