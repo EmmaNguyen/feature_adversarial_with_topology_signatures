@@ -7,10 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
+import scipy as sp
 from torch.autograd import Variable
 from tensorflow.examples.tutorials.mnist import input_data
 from parallel_geometry_score.gs import geom_score, rlt, rlts
-
+from ot import gromov_wasserstein2, unif
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 mb_size = 32
@@ -86,8 +87,20 @@ def geometry_score(X, Y):
     return Variable(Tensor(geom_score(rlts1, rlts2)),
                     requires_grad=False)
 
+def gromov_wasserstein_distance(X, Y):
+    C1 = sp.spatial.distance.cdist(X.data.cpu().numpy(), X.data.cpu().numpy())
+    C2 = sp.spatial.distance.cdist(Y.data.cpu().numpy(), Y.data.cpu().numpy())
+    C1 /= C1.max()
+    C2 /= C2.max()
+    p = unif(32)
+    q = unif(32)
+    import pdb; pdb.set_trace()
+    return Variable(Tensor(gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4)),
+                    requires_grad=False)
+
 # metric_regularized = l2_distance
-metric_regularized = geometry_score
+# metric_regularized = geometry_score
+metric_regularized = gromov_wasserstein_distance
 
 for it in range(1000000):
     """ Discriminator """

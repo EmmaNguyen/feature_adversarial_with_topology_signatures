@@ -56,6 +56,8 @@ def geom_score(rlts1, rlts2):
        Float, a number representing topological similarity of two datasets.
 
     """
-    mrlt1 = torch.mean(rlts1, dim=0)
-    mrlt2 = torch.mean(rlts2, dim=0)
-    return torch.sum((mrlt1 - mrlt2) ** 2)
+    #mrlt1 = torch.mean(rlts1, dim=0)
+    #mrlt2 = torch.mean(rlts2, dim=0)
+    #import pdb; pdb.set_trace()
+    #return torch.sum((mrlt1 - mrlt2) ** 2)
+    return torch.sum((rlts1 - rlts2) ** 2, dim =0)

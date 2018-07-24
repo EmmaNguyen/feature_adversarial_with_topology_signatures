@@ -76,12 +76,21 @@ D_solver = optim.Adam(D.parameters(), lr=lr)
 def l2_distance(X, Y):
     return torch.sum((X - Y)**2, 1)
 
+def l1_distance(X,Y):
+    return torch.abs(X - Y)
+
 def geometry_score(X, Y):
-    rlts1 = rlts(X, n=mb_size)
-    rlts2 = rlts(Y.detach(), n=mb_size)
     # import pdb; pdb.set_trace()
-    return Variable(Tensor(mb_size, 1).fill_(geom_score(rlts1, rlts2)),
-                    requires_grad=False)
+    rlts1 = rlts(X.detach(), n=mb_size)
+    rlts2 = rlts(Y.detach(), n=mb_size)
+    #return Variable(Tensor(mb_size, 1).fill_(geom_score(rlts1, rlts2)),
+    #                requires_grad=False)
+    return geom_score(rlts1, rlts2)
+
+def gromov_weierstrass_distance(X, Y, p=1):
+    if p == 1:
+        return 1/2 * np.torch(toch.array([l1_distance(l2_distance(x1,x2), l2_distance(y1,y2))
+            for x1, x2 in X for y1, y2 in Y]))
 
 # metric_regularized = l2_distance
 metric_regularized = geometry_score
