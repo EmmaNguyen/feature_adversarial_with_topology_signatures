@@ -88,15 +88,18 @@ def geometry_score(X, Y):
                     requires_grad=False)
 
 def gromov_wasserstein_distance(X, Y):
-    C1 = sp.spatial.distance.cdist(X.data.cpu().numpy(), X.data.cpu().numpy())
-    C2 = sp.spatial.distance.cdist(Y.data.cpu().numpy(), Y.data.cpu().numpy())
-    C1 /= C1.max()
-    C2 /= C2.max()
-    p = unif(mb_size)
-    q = unif(mb_size)
-#    import pdb; pdb.set_trace()
-    return Variable(Tensor(mb_size, 0).fill_(gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4)),
-                    requires_grad=False)
+    import concurrent.futures
+    gw_dist = np.zeros(mb_size)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        for i in executor.map(range(mb_size)):
+            C1 = sp.spatial.distance.cdist(X[i,:].reshape(28,28).data.cpu().numpy(), X[i,:].reshape(28,28).data.cpu().numpy()) #Convert data back to an image from one hot encoding with size 28x28
+            C2 = sp.spatial.distance.cdist(Y[i,:].reshape(28,28).data.cpu().numpy(), Y[i,:].reshape(28,28).data.cpu().numpy())
+            C1 /= C1.max()
+            C2 /= C2.max()
+            p = unif(28)
+            q = unif(28)
+            gw_dist[i] = gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4) 
+    return Variable(Tensor(gw_dist), requires_grad=False)  
 
 # metric_regularized = l2_distance
 # metric_regularized = geometry_score
