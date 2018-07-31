@@ -121,7 +121,7 @@ for it in range(1000000):
 
     D_loss = -torch.mean(log(D_real) + log(1 - D_fake))
 
-    D_loss.backward()
+    #D_loss.backward()
     D_solver.step()
 
     # Housekeeping - reset gradient
@@ -144,7 +144,7 @@ for it in range(1000000):
     reg = torch.mean(metric_regularized(X, G_sample_reg))
     G_loss = reg
 
-    G_loss.backward()
+    #G_loss.backward()
     G_solver.step()
 
     # Housekeeping - reset gradient
@@ -158,16 +158,17 @@ for it in range(1000000):
     G_sample_reg = G(E(X))
     D_reg = D(G_sample_reg)
 
-    E_loss = reg
+    E_loss = torch.mean(metric_regularized(X, G_sample_reg))
 
-    E_loss.backward()
+
+    #E_loss.backward()
     E_solver.step()
 
     # Housekeeping - reset gradient
     reset_grad()
 
     # Print and plot every now and then
-    if it % 10 == 0:
+    if it % 1000 == 0:
         print('Iter-{}; D_loss: {}; E_loss: {}; G_loss: {}'
               .format(it, D_loss.data.numpy(), E_loss.data.numpy(), G_loss.data.numpy()))
 
