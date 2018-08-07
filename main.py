@@ -34,7 +34,6 @@ def parse_arguments():
     return parser.parse_args()
 
 def run_feature_adversarial_network(opt):
-        # import pdb; pdb.set_trace()
         data_loader = get_MNIST(opt)
 
         generator = Generator(opt.latent_dim, opt.img_size, opt.channels)
@@ -81,7 +80,6 @@ def run_feature_adversarial_network(opt):
 
                 discriminator_solver.zero_grad()
                 discriminator_loss = get_loss_discriminator(discriminator, fake_imgs, z, real_imgs, fake_z)
-                # import pdb; pdb.set_trace()
                 discriminator_loss.backward()
                 discriminator_solver.step()
 
@@ -95,6 +93,4 @@ def run_feature_adversarial_network(opt):
 
 if __name__=="__main__":
     opt = parse_arguments()
-    # import pdb; pdb.set_trace()
     run_feature_adversarial_network(opt)
-    # run_feature_adversarial_network(opt)
