@@ -6,6 +6,8 @@ from torch.autograd import Variable
 from .distributions import rand_circle2d
 from ot import gromov_wasserstein2, unif
 
+Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
 def rand_projections(embedding_dim, num_samples=50):
     """This fn generates `L` random samples from the latent space's unit sphere.
 
