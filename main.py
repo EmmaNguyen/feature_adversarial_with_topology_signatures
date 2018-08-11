@@ -11,7 +11,7 @@ $python main.py
 
 import argparse
 
-from experiments.vae_gan import simple_demo
+from experiments.vaegan import simple_demo
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="PyTorch Implementation")
