@@ -5,7 +5,7 @@ import torchvision.utils as vutils
 from torchvision import datasets, transforms
 
 from models.architecture.vaegan.distributions import rand_circle2d, rand_ring2d, rand_uniform2d
-from models.architecture.vaegan.models.mnist import MNISTAutoencoder
+from models.architecture.vaegan.mnist import MNISTAutoencoder
 from models.architecture.vaegan.trainer import SWAEBatchTrainer
 
 def simple_demo(args):
