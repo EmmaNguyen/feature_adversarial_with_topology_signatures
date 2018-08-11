@@ -1,8 +1,10 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
+from torch.autograd import Variable
 
 from .distributions import rand_circle2d
+from ot import gromov_wasserstein2, unif
 
 def rand_projections(embedding_dim, num_samples=50):
     """This fn generates `L` random samples from the latent space's unit sphere.
@@ -73,6 +75,8 @@ def sliced_wasserstein_distance(encoded_samples, distribution_fn=rand_circle2d, 
 
 def gromov_wasserstein_distance(X, Y):
     import concurrent.futures
+    # import pdb; pdb.set_trace()
+    mb_size = X.size(0)
     gw_dist = np.zeros(mb_size)
     with concurrent.futures.ProcessPoolExecutor() as executor:
         for i in executor.map(range(mb_size)):
