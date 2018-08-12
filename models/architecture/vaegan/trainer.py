@@ -6,7 +6,6 @@ from torch.autograd import Variable
 from .distributions import rand_circle2d
 from ot import gromov_wasserstein2, unif
 
-Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
 def rand_projections(embedding_dim, num_samples=50):
     """This fn generates `L` random samples from the latent space's unit sphere.
@@ -75,11 +74,12 @@ def sliced_wasserstein_distance(encoded_samples, distribution_fn=rand_circle2d, 
     swd = _sliced_wasserstein_distance(encoded_samples, z, num_projections, p)
     return swd
 
-def gromov_wasserstein_distance(X, Y):
+def gromov_wasserstein_distance(X, Y, device):
     import concurrent.futures
     # import pdb; pdb.set_trace()
     mb_size = X.size(0)
     gw_dist = np.zeros(mb_size)
+    Tensor = torch.FloatTensor 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         for i in executor.map(range(mb_size)):
             C1 = sp.spatial.distance.cdist(X[i,:].reshape(28,28).data.cpu().numpy(), X[i,:].reshape(28,28).data.cpu().numpy()) #Convert data back to an image from one hot encoding with size 28x28
@@ -140,10 +140,10 @@ class SWAEBatchTrainer:
         recon_x, z = self.model_(x)
         # Equation 4 - this works for 1D
         bce = F.binary_cross_entropy(recon_x, x)
-        gw = gromov_wasserstein_distance(recon_x, x)
+        gw = gromov_wasserstein_distance(recon_x, x, self._device)
         # Equation 15, this is only works for 2D
         w2 = float(self.weight_swd) * sliced_wasserstein_distance(z, self._distribution_fn, self.num_projections_, self.p_)
         # Equation 16: but why there is a bce. Following the original implementation with Keras
         # it is said that (bce and l1) is the first term for equation 16, and w2 for the second term.
-        loss = bce + lp + w2
-        return {'loss': loss, 'bce': bce, 'l1': l1, 'w2': w2, 'encode': z, 'decode': recon_x}
+        loss = bce + gw  + w2
+        return {'loss': loss, 'bce': bce, 'l1': gw, 'w2': w2, 'encode': z, 'decode': recon_x}
