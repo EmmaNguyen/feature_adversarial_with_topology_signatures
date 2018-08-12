@@ -79,7 +79,7 @@ def gromov_wasserstein_distance(X, Y, device):
     # import pdb; pdb.set_trace()
     mb_size = X.size(0)
     gw_dist = np.zeros(mb_size)
-    Tensor = torch.FloatTensor 
+    Tensor = torch.FloatTensor
     with concurrent.futures.ProcessPoolExecutor() as executor:
         for i in executor.map(range(mb_size)):
             C1 = sp.spatial.distance.cdist(X[i,:].reshape(28,28).data.cpu().numpy(), X[i,:].reshape(28,28).data.cpu().numpy()) #Convert data back to an image from one hot encoding with size 28x28
@@ -89,7 +89,8 @@ def gromov_wasserstein_distance(X, Y, device):
             p = unif(28)
             q = unif(28)
             gw_dist[i] = gromov_wasserstein2(C1, C2, p, q, loss_fun='square_loss', epsilon=5e-4)
-    return Variable(Tensor(gw_dist))
+    print("*"*100)
+    return Variable(Tensor(gw_dist), requires_grad=True).sum()
 
 class SWAEBatchTrainer:
     """Sliced Wasserstein Autoencoder Batch Trainer.
@@ -145,5 +146,5 @@ class SWAEBatchTrainer:
         w2 = float(self.weight_swd) * sliced_wasserstein_distance(z, self._distribution_fn, self.num_projections_, self.p_)
         # Equation 16: but why there is a bce. Following the original implementation with Keras
         # it is said that (bce and l1) is the first term for equation 16, and w2 for the second term.
-        loss = bce + gw  + w2
-        return {'loss': loss, 'bce': bce, 'l1': gw, 'w2': w2, 'encode': z, 'decode': recon_x}
+        loss = bce + gw + w2
+        return {'loss': loss, 'bce': bce, 'gw': gw, 'w2': w2, 'encode': z, 'decode': recon_x}
