@@ -7,6 +7,7 @@ from torchvision import datasets, transforms
 from models.architecture.vaegan.distributions import rand_circle2d, rand_ring2d, rand_uniform2d
 from models.architecture.vaegan.models.mnist import MNISTAutoencoder
 from models.architecture.vaegan.trainer import SWAEBatchTrainer
+from utils.visualization.export_results import save_encoded_sample
 
 def simple_demo(args):
     """
@@ -75,17 +76,4 @@ def simple_demo(args):
                 epoch + 1, float(epoch + 1) / (args.epochs) * 100.,
                 test_loss))
 
-        # save encoded samples plot
-        plt.figure(figsize=(10, 10))
-        plt.scatter(test_encode[:, 0], -test_encode[:, 1], c=(10 * test_targets), cmap=plt.cm.Spectral)
-        plt.xlim([-1.5, 1.5])
-        plt.ylim([-1.5, 1.5])
-        # plt.title('Test Latent Space\nLoss: {:.5f}'.format(test_loss))
-        plt.savefig('../data/test_latent_epoch_{}.png'.format(epoch + 1))
-        plt.close()
-        # save sample input and reconstruction
-        vutils.save_image(x,
-                          '../data/test_samples_epoch_{}.png'.format(epoch + 1))
-        vutils.save_image(batch['decode'].detach(),
-                          '../data/test_reconstructions_epoch_{}.png'.format(epoch + 1),
-                          normalize=True)
+        save_encoded_sample(test_encode, test_targets, epoch)
