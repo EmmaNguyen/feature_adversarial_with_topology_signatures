@@ -176,11 +176,11 @@ class SWAEBatchTrainer:
         x = x.to(self._device)
         recon_x, z = self.model_(x)
         # Equation 4 - this works for 1D
-        bce = F.binary_cross_entropy(recon_x, x)
+        # import pdb; pdb.set_trace()
         gw = gromov_wasserstein_distance(recon_x, x, self._device)
         # Equation 15, this is only works for 2D
-        w2 = float(self.weight_swd) * sliced_wasserstein_distance(z, self._distribution_fn, self.num_projections_, self.p_)
+        entropy = float(self.weight_swd) * topology_persistence(z, self._distribution_fn, self.num_projections_, self.p_)
         # Equation 16: but why there is a bce. Following the original implementation with Keras
         # it is said that (bce and l1) is the first term for equation 16, and w2 for the second term.
-        loss = bce + gw + w2
-        return {'loss': loss, 'bce': bce, 'gw': gw, 'w2': w2, 'encode': z, 'decode': recon_x}
+        loss = gw + entropy
+        return {'loss': loss, 'gw': gw, 'entropy': entropy, 'encode': z, 'decode': recon_x}
