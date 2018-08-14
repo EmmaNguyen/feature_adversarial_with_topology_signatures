@@ -167,3 +167,15 @@ class MNISTAutoencoder(nn.Module):
     def forward(self, x):
         z = self.encoder(x)
         return self.decoder(z), z
+
+class MNISTAdversariallearner(nn.Module):
+    def __init__(self, subscripted_views=16):
+        super(MNISTAdversariallearner, self).__init__()
+
+        self.subscripted_views = 16
+
+        self.discriminator = MNISTAdversariallearner(subscripted_views)
+
+    def forward(self, batch):
+        None
+        return self.v
