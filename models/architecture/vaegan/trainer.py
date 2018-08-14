@@ -74,6 +74,42 @@ def sliced_wasserstein_distance(encoded_samples, distribution_fn=rand_circle2d, 
     swd = _sliced_wasserstein_distance(encoded_samples, z, num_projections, p)
     return swd
 
+def _topology_persistence(encoded_samples, distribution_samples, num_projections=50, p=2):
+    prior_subcripted_views = distribution_samples
+    posterior_subscripted_views = encoded_samples
+
+    adversarial_learner = AdversariallearnerBatchTrainer()
+    adversarial_learner.train_on_batch(prior_subcripted_views)
+
+    posterior_pred = adversarial_learner.eval_on_batch(posterior_subscripted_views)
+    bce = F.binary_cross_entropy(posterior_pred)
+
+    # derive latent space dimension size from random samples drawn from a distribution in it
+    embedding_dim = distribution_samples.size(1)
+    # generate random projections in latent space
+    projections = rand_projections(embedding_dim, num_projections)
+    # calculate projection of the encoded samples
+    #import pdb; pdb.set_trace()
+    Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+    encoded_projections = encoded_samples.matmul(projections.transpose(0, 1).cuda())
+    # calculate projection of the random distribution samples
+    distribution_projections = distribution_samples.matmul(projections.transpose(0, 1))
+    # calculate the sliced wasserstein distance by
+    # sorting the samples per projection and
+    # calculating the difference between the
+    # encoded samples and drawn samples per projection
+    wasserstein_distance = torch.sort(encoded_projections.transpose(0, 1).cuda(), dim=1)[0] - torch.sort(distribution_projections.transpose(0, 1).cuda(), dim=1)[0]
+    # distance between them (L2 by default for Wasserstein-2)
+    wasserstein_distance_p = torch.pow(wasserstein_distance, p)
+    # approximate wasserstein_distance for each projection
+    return wasserstein_distance_p.mean()
+
+def topology_persistence(encoded_samples, distribution_fn=rand_cirlce2d, num_projections=50, p=2):
+    batch_size = encoded_samples.size(0)
+    z = distribution_fn(batch_size)
+    return _topology_persistence(encoded_samples, self._distribution_fn, self.num_projections_, self.p_)
+
+
 def gromov_wasserstein_distance(X, Y, device):
     import concurrent.futures
     # import pdb; pdb.set_trace()
@@ -140,11 +176,11 @@ class SWAEBatchTrainer:
         x = x.to(self._device)
         recon_x, z = self.model_(x)
         # Equation 4 - this works for 1D
-        bce = F.binary_cross_entropy(recon_x, x)
+        # import pdb; pdb.set_trace()
         gw = gromov_wasserstein_distance(recon_x, x, self._device)
         # Equation 15, this is only works for 2D
-        w2 = float(self.weight_swd) * sliced_wasserstein_distance(z, self._distribution_fn, self.num_projections_, self.p_)
+        entropy = float(self.weight_swd) * topology_persistence(z, self._distribution_fn, self.num_projections_, self.p_)
         # Equation 16: but why there is a bce. Following the original implementation with Keras
         # it is said that (bce and l1) is the first term for equation 16, and w2 for the second term.
-        loss = bce + gw + w2
-        return {'loss': loss, 'bce': bce, 'gw': gw, 'w2': w2, 'encode': z, 'decode': recon_x}
+        loss = gw + entropy
+        return {'loss': loss, 'gw': gw, 'entropy': entropy, 'encode': z, 'decode': recon_x}
