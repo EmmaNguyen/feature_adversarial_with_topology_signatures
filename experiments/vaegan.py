@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
 import torchvision.utils as vutils
@@ -8,6 +7,7 @@ from models.architecture.vaegan.distributions import rand_circle2d, rand_ring2d,
 from models.architecture.vaegan.models.mnist import MNISTAutoencoder
 from models.architecture.vaegan.trainer import SWAEBatchTrainer
 from utils.visualization.export_results import save_encoded_sample
+from utils.data.mnist import MNISTloader
 
 def simple_demo(args):
     """
@@ -24,14 +24,9 @@ def simple_demo(args):
         args.batch_size, args.epochs, args.lr, args.alpha, args.distribution, device.type, args.seed
     ))
     # build train and test set data loaders
-    train_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, download=True,
-                       transform=transforms.Compose([transforms.ToTensor()])),
-        batch_size=args.batch_size, shuffle=True, **dataloader_kwargs)
-    test_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=False, download=True,
-                       transform=transforms.Compose([transforms.ToTensor()])),
-        batch_size=64, shuffle=False, **dataloader_kwargs)
+    train_loader, test_loader = MNISTloader(
+                              raw_data_path="../data_path",
+                              batch_size=arg.batch_size)
     # create encoder and decoder
     model = MNISTAutoencoder().to(device)
     print(model)
