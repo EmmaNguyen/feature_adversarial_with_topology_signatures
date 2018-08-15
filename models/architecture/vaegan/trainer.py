@@ -148,9 +148,10 @@ class SWAEBatchTrainer:
             weight_swd (float): weight of divergence metric compared to reconstruction in loss
             device (torch.Device): torch device
     """
-    def __init__(self, autoencoder, optimizer, distribution_fn,
+    def __init__(self, autoencoder, discriminator, optimizer, distribution_fn,
                  num_projections=50, p=2, weight_swd=10.0, device=None):
         self.model_ = autoencoder
+        self.entropy_ = discriminator
         self.optimizer = optimizer
         self._distribution_fn = distribution_fn
         self.embedding_dim_ = self.model_ .encoder.embedding_dim_
@@ -187,8 +188,40 @@ class SWAEBatchTrainer:
         # import pdb; pdb.set_trace()
         gw = gromov_wasserstein_distance(recon_x, x, self._device)
         # Equation 15, this is only works for 2D
-        entropy = float(self.weight_swd) * topology_persistence(z, self._distribution_fn, self.num_projections_, self.p_)
+        entropy = float(self.weight_swd) * self.discriminator(x, recon_x)
         # Equation 16: but why there is a bce. Following the original implementation with Keras
         # it is said that (bce and l1) is the first term for equation 16, and w2 for the second term.
         loss = gw + entropy
         return {'loss': loss, 'gw': gw, 'entropy': entropy, 'encode': z, 'decode': recon_x}
+
+class AdversariallearnerBatchTrainer:
+    def __init__(self, discriminator, optimizer, num_projections, p=2, device=None):
+        self.model_ = discriminator
+        self.optimizer = optimizer
+        self._device = device if device else torch.device('cpu')
+
+    def __call__(self, x):
+        return self.eval_on_batch(x)
+
+    def train_on_batch(self):
+        # reset gradients
+        self.optimizer.zero_grad()
+        # adversarial foward pass and loss
+        evals = self.eval_on_batch()
+        # backpropagate loss
+        evals.backward()
+        # update discriminator parameters
+        self.optimizer.step()
+        return evals
+
+    def test_on_batch(self, x):
+        self.optimizer.zero_grad()
+        evals = self.eval_on_batch(homology_x)
+
+    def eval_on_batch(self, x, recon_x):
+        # Create a persistent homology
+        ph_x, ph_recon_x = persistent_homology(x, num_projections), persistent_homology(recon_x, num_projections)
+        real_discrimination = self._model(ph_x)
+        fake_discrimination = self._model(ph_recon_x)
+        loss = -torch.mean(log(real_discrimination) + log(1-fake_discrimination))
+        return {'topology_persistence': loss, 'real_homology': ph_x, 'fake_homology': ph_recon_x}
