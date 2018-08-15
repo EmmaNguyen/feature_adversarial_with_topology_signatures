@@ -5,6 +5,7 @@ from torch.autograd import Variable
 
 from .distributions import rand_circle2d
 from ot import gromov_wasserstein2, unif
+import gudhi
 
 
 def rand_projections(embedding_dim, num_samples=50):
@@ -104,12 +105,19 @@ def _topology_persistence(encoded_samples, distribution_samples, num_projections
     # approximate wasserstein_distance for each projection
     return wasserstein_distance_p.mean()
 
-def topology_persistence(encoded_samples, distribution_fn=rand_cirlce2d, num_projections=50, p=2):
+def topology_persistence(encoded_samples, distribution_fn=rand_circle2d, num_projections=50, p=2):
     batch_size = encoded_samples.size(0)
     z = distribution_fn(batch_size)
-    return _topology_persistence(encoded_samples, self._distribution_fn, self.num_projections_, self.p_)
+    return _topology_persistence(encoded_samples, z, num_projections=50, p=2)
 
+def _persistent_homology(samples, num_projections):
+    rips = gudhi.RipsComplex(points=samples, max_edge_length=42)
+    simplex_tree = rips.create_simplex_tree(max_dimension=1)
+    diag = simplex_tree.persistence(homology_coeff_field=2, min_persistence=0)
+    return
 
+def persistent_homology(samples, num_projections=16):
+    return _persistent_homology(samples, num_projections)
 def gromov_wasserstein_distance(X, Y, device):
     import concurrent.futures
     # import pdb; pdb.set_trace()
