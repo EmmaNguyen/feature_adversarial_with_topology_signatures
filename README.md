@@ -15,6 +15,12 @@ To install all packages, please continue with following command,
 ```
 pip install -r requirements.txt
 ```
+### Run a test on setup
+
+```
+python -m unittest
+```
+
 ### How to run source
 Below is the main file to trigger all important settings along with experiments.
 Expected result will be at `../data/`
